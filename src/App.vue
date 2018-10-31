@@ -9,12 +9,15 @@
         <v-flex xs6>
           <Form />
         </v-flex>
-        <v-flex xs6>
-          <GChart 
-            type="LineChart"
-            :data="chartData"
-            :options="options"
-          ></GChart>
+        <v-flex height="100%" xs6>
+          <v-card class="wrapper">
+            <LineChart 
+              :chartData="chartData"
+              xAxisText="Gymnast" 
+              yAxisText="Score"
+            />
+            <v-btn class="clear" @click="chartData = []">Clear</v-btn>
+          </v-card>
         </v-flex>
         <v-flex xs12 class="results">
           <Results />
@@ -30,13 +33,15 @@ import Results from './components/Results'
 import Loading from './components/Loading'
 
 import { mapGetters } from 'vuex'
+import LineChart from '@/d3-charts/line-chart'
 
 export default {
   name: 'App',
   components: {
     Form,
     Results,
-    Loading
+    Loading,
+    LineChart
   },
   computed: {
     ...mapGetters([
@@ -45,20 +50,28 @@ export default {
   },
   watch: {
     results() {
-      this.chartData = [Object.keys(this.results[0]), ...this.results.map(row => Object.values(row))]
-      console.log(this.chartData)
+      let d = [...this.results.map((row, i) => ({x: i, y: (parseFloat(row['Score Qualif.']) || 0)}))]
+
+      d.sort((a, b) =>{
+        const A = parseFloat(a)
+        const B = parseFloat(b)
+        if(A > B) return 1
+        if(A < B) return -1
+        return 0
+      }).reverse()
+      
+      this.id ++
+
+      this.chartData.push({
+        id: this.id,
+        values: d
+      })
     }
   },
   data () {
     return {
       chartData: [],
-      options: {
-        chart: {
-          title: 'Stats'
-        },
-        width: 400,
-        height: 300
-      }
+      id: 1
     }
   }
 }
@@ -66,11 +79,21 @@ export default {
 
 <style scoped lang="scss">
 .form {
-  height: 30vh;
+  height: 300px;
   margin-bottom: 50px;
 }
 .fill {
   height: 100%;
 }
+.wrapper {
+  height: 300px;
+  position: relative;
+  .clear {
+    position: absolute;
+    bottom: -50px;
+    left: 0;
+  }  
+}
+
 
 </style>

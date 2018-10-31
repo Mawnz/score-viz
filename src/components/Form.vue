@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card height="100%">
     <v-card-title primary-title>
       <span class="headline">Search for results</span>
     </v-card-title>
